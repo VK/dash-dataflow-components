@@ -278,3 +278,22 @@ GitHub.sublime-settings
 # Julia manifest file names
 Manifest.toml
 JuliaManifest.toml
+
+
+# generated python R and julia
+dash_dataflow_components/*
+!dash_dataflow_components/plottypes/
+!dash_dataflow_components/transformationtypes/
+
+
+
+/dash_dataflow_components
+/deps
+/inst
+/man
+/R
+DESCRIPTION
+NAMESPACE
+/src/*.jl
+/src/jl/
+/docs

@@ -18,17 +18,10 @@ app = Dash(
 app.layout = html.Div([
     ddc.DataFlow(
         id='flow',
-        nodes= [
-              { "id": '1', "position": { "x": 0, "y": 0 }, "data": { "name": "test" }, "type": "db"},
-              { "id": '2', "position": { "x": 0, "y": 100 }, "data": { }, "type": 'merge'},
-              { "id": '3', "position": { "x": 0, "y": 200 }, "data": { }, "type": 'filter'},
-              { "id": '4', "position": { "x": 0, "y": 300 }, "data": { }, "type": 'out'},
-        ],
-        edges = [
-            { "id": 'e1-2', "source": '1', "target": '2', "animated": True },
-            { "id": 'e2-3', "source": '2', "target": '3', "animated": True },
-            { "id": 'e3-4', "source": '3', "target": '4', "animated": True }
-            ]
+
+        nodes=  [{'id': 'n102', 'type': 'merge'}, {'id': 'n101', 'type': 'db'}, {'id': 'n100', 'type': 'db'}, {'id': '1', 'type': 'db'}, {'id': '2', 'type': 'merge'}, {'id': '3', 'type': 'filter'}, {'id': '4', 'type': 'out'}],
+
+        edges = [{'source': '1', 'target': '2', 'sourceHandle': 'o', 'targetHandle': 'i1'}, {'source': 'n100', 'target': '2', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': '3', 'target': '4', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': '2', 'target': 'n102', 'sourceHandle': 'o', 'targetHandle': 'i1'}, {'source': 'n101', 'target': 'n102', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n102', 'target': '3', 'sourceHandle': 'o', 'targetHandle': 'i'}]
         ),
     html.Div(id="node_out"),
     html.Div(id="edge_out"),

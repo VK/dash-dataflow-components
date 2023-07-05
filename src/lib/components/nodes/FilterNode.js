@@ -9,7 +9,7 @@ const FilterNode = ({ data, isConnectable, id }) => {
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: 180 }}>
-      <Handle type="target" position={Position.Top} id="a" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Top} id="i" isConnectable={isConnectable} />
 
       <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1 }}>
         <button type="button" className="btn btn-outline-secondary btn-sm"><span className="fas fa-edit" aria-hidden="true"></span></button>
@@ -27,7 +27,7 @@ const FilterNode = ({ data, isConnectable, id }) => {
           Filter</h5>
       </div>
 
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Bottom} id="o" isConnectable={isConnectable} />
     </div>
   );
 

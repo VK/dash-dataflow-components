@@ -7,14 +7,14 @@ const OutputNode = ({ data, isConnectable, id }) => {
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: 180 }}>
-      <Handle type="target" position={Position.Top} id="a" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Top} id="i" isConnectable={isConnectable} />
 
       <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1 }}>
-        <button type="button" className="btn btn-outline-secondary btn-sm"><span className="fas fa-edit" aria-hidden="true"></span></button>
+        {/* <button type="button" className="btn btn-outline-secondary btn-sm"><span className="fas fa-edit" aria-hidden="true"></span></button>
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => {
           const toDelete = instance.getNodes().filter((node) => node.id == id);
           instance.deleteElements({ nodes: toDelete })
-        }}><span className="fas fa-trash" aria-hidden="true"></span></button>
+        }}><span className="fas fa-trash" aria-hidden="true"></span></button> */}
       </div>
 
       <div className="card-body p-0">
