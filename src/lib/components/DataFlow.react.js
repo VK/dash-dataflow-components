@@ -10,7 +10,7 @@ import 'reactflow/dist/style.css';
 
 import nodeTypes from "./nodes/nodeTypes"
 
-import Sidebar from './Sidebar';
+import SideBar from './SideBar.react';
 import { apply } from 'ramda';
 import Modal from 'react-bootstrap/Modal';
 import { ModalBody } from 'react-bootstrap';
@@ -237,7 +237,7 @@ export default class DataFlow extends Component {
                         </Modal.Header>
                         <Modal.Body style={{ width: '100%', height: 500, padding: 0, top: -25, position: "relative" }} ref={this.reactFlowDiv}>
 
-                            <Sidebar />
+                            <SideBar />
                             <ReactFlow
                                 nodes={nodes.map((el) => { return { ...el, editable: true } })}
                                 edges={edges}
