@@ -5,7 +5,7 @@ using Dash
 const resources_path = realpath(joinpath( @__DIR__, "..", "deps"))
 const version = "0.0.1"
 
-include("jl/dataflow.jl")
+include("jl/''_dataflow.jl")
 
 function __init__()
     DashBase.register_package(

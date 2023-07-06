@@ -10,13 +10,15 @@ ExampleComponent is an example component. It takes a property, `label`, and di
 }
 
 \usage{
-''DataFlow(id=NULL, edges=NULL, nodes=NULL)
+''DataFlow(id=NULL, edges=NULL, meta=NULL, nodes=NULL)
 }
 
 \arguments{
 \item{id}{Character. The ID used to identify this component in Dash callbacks.}
 
 \item{edges}{Unnamed list. The value displayed in the input.}
+
+\item{meta}{Named list. The value displayed in the input.}
 
 \item{nodes}{Unnamed list. A label that will be printed when this component is rendered.}
 }
