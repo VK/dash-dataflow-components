@@ -18,9 +18,11 @@
   "author": "Viktor Krückl <viktor@krueckl.de>",
   "license": "MIT",
   "dependencies": {
+    "bootstrap": "^5.3.0",
     "dagre": "^0.8.5",
     "fs": "^0.0.1-security",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "react-bootstrap": "^2.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",

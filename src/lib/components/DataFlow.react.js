@@ -12,6 +12,9 @@ import nodeTypes from "./nodes/nodeTypes"
 
 import Sidebar from './Sidebar';
 import { apply } from 'ramda';
+import Modal from 'react-bootstrap/Modal';
+import { ModalBody } from 'react-bootstrap';
+
 
 
 /**
@@ -27,7 +30,7 @@ export default class DataFlow extends Component {
 
         var g = new dagre.graphlib.Graph();
         // Set an object for the graph label
-        g.setGraph({ rankDir: "TB" });
+        g.setGraph({ rankDir: "TB", ranker: "tight-tree" });
 
         // Default to assigning a new object as a label for each new edge.
         g.setDefaultEdgeLabel(function () { return {}; });
@@ -45,8 +48,6 @@ export default class DataFlow extends Component {
                 positions[el.label] = { x: el.x, y: el.y };
             }
         });
-
-        console.log(positions);
 
         return {
             nodes: nodes.map((el) => { return { ...el, position: positions[el.id] } }),
@@ -71,11 +72,13 @@ export default class DataFlow extends Component {
             id: props.id,
             eNodes: props.nodes,
             eEdges: props.edges,
+            showFlowModal: false,
             ...this.update_internal_nodes(props.nodes, props.edges)
         };
         console.log(this.state);
 
         this.reactFlowWrapper = React.createRef();
+        this.reactFlowDiv = React.createRef();
 
         const int_ids = props.nodes.map(el => parseInt(el.id.replace(/\D/g, '')));
 
@@ -87,14 +90,14 @@ export default class DataFlow extends Component {
         edge_to_add.animated = true;
 
         const new_edges = addEdge(edge_to_add, this.state.edges);
-        
+
 
         this.setState({
             edges: new_edges
         })
-        if (this.setProps) this.setProps({
-            edges: this.get_external_edges(new_edges)
-        })
+        // if (this.setProps) this.setProps({
+        //     edges: this.get_external_edges(new_edges)
+        // })
     }
 
     onNodesChange = (nodes) => {
@@ -104,9 +107,9 @@ export default class DataFlow extends Component {
         this.setState({
             nodes: new_nodes
         })
-        if (this.setProps) this.setProps({
-            nodes: this.get_external_nodes(new_nodes)
-        })
+        // if (this.setProps) this.setProps({
+        //     nodes: this.get_external_nodes(new_nodes)
+        // })
     }
 
 
@@ -121,9 +124,9 @@ export default class DataFlow extends Component {
             this.setState({
                 edges: new_edges
             })
-            if (this.setProps) this.setProps({
-                edges: this.get_external_edges(new_edges)
-            })
+            // if (this.setProps) this.setProps({
+            //     edges: this.get_external_edges(new_edges)
+            // })
 
         }
 
@@ -135,7 +138,7 @@ export default class DataFlow extends Component {
 
         event.preventDefault();
 
-        const reactFlowBounds = this.reactFlowWrapper.current.getBoundingClientRect();
+        const reactFlowBounds = this.reactFlowDiv.current.getBoundingClientRect();
         const type = event.dataTransfer.getData('application/reactflow');
 
         // check if the dropped element is valid
@@ -143,10 +146,17 @@ export default class DataFlow extends Component {
             return;
         }
 
-        const position = {
+        let position = {
             x: event.clientX - reactFlowBounds.left - 15,
             y: event.clientY - reactFlowBounds.top - 15,
         };
+        if (this.state.instance) {
+            position = this.state.instance.project({
+                x: event.clientX - reactFlowBounds.left - 15,
+                y: event.clientY - reactFlowBounds.top - 40,
+            });
+        }
+
         const newNode = {
             id: this.getId(),
             type,
@@ -164,6 +174,36 @@ export default class DataFlow extends Component {
 
     }
 
+    handleClose = () => {
+
+        const res = this.update_internal_nodes(
+            this.get_external_nodes(this.state.nodes),
+            this.get_external_edges(this.state.edges)
+        )
+
+        if (this.setProps) this.setProps({
+            edges: this.get_external_edges(res.edges),
+            nodes: this.get_external_nodes(res.nodes),
+        })
+
+        this.setState({ showFlowModal: false, ...res });
+
+        let view = this.state.viewInstance;
+        setTimeout(() => view.fitView({ duration: 200 }), 100);
+
+    }
+    handleShow = (e) => {
+        console.log(e);
+        this.setState({ showFlowModal: true });
+    }
+
+    getInstance = (i) => {
+        this.setState({ instance: i });
+    }
+    getViewInstance = (i) => {
+        this.setState({ viewInstance: i });
+    }
+
 
     /**
      * if the plot config changes and the extra plotApi should be used
@@ -177,27 +217,69 @@ export default class DataFlow extends Component {
     }
 
     render() {
-        const { id, nodes, edges } = this.state;
+        const { id, nodes, edges, showFlowModal } = this.state;
 
         return (
             <div id={id} style={{ width: '100%', height: '100%' }} ref={this.reactFlowWrapper}>
                 <ReactFlowProvider>
-                    <Sidebar />
+
+                    <Modal
+                        centered
+                        backdrop="static"
+                        animation={false}
+                        show={showFlowModal}
+                        onHide={() => this.handleClose()
+                        }
+                        size="lg"
+                    >
+                        <Modal.Header closeButton>
+                            <Modal.Title>DataFlow</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body style={{ width: '100%', height: 500, padding: 0, top: -25, position: "relative" }} ref={this.reactFlowDiv}>
+
+                            <Sidebar />
+                            <ReactFlow
+                                nodes={nodes.map((el) => { return { ...el, editable: true } })}
+                                edges={edges}
+                                onNodesChange={this.onNodesChange}
+                                onEdgesChange={this.onEdgesChange}
+                                nodeTypes={nodeTypes}
+                                onConnect={this.onConnect}
+                                onDrop={this.onDrop}
+                                onDragOver={this.onDragOver}
+                                onInit={this.getInstance}
+                                minZoom={0.01}
+                                fitView
+                            >
+                                <MiniMap zoomable pannable />
+                                <Controls />
+                            </ReactFlow>
+                        </Modal.Body>
+                    </Modal>
+                </ReactFlowProvider>
+                <ReactFlowProvider>
                     <ReactFlow
                         nodes={nodes}
                         edges={edges}
-                        onNodesChange={this.onNodesChange}
-                        onEdgesChange={this.onEdgesChange}
-                        nodeTypes={nodeTypes}
-                        onConnect={this.onConnect}
-                        onDrop={this.onDrop}
-                        onDragOver={this.onDragOver}
-                        style={{ "width": "calc(100% - 60px)" }}
                         fitView
-                    >
-                        <MiniMap zoomable pannable />
-                        <Controls />
-                    </ReactFlow>
+                        nodesDraggable={false}
+                        edgesFocusable={false}
+                        panOnDrag={false}
+                        zoomOnScroll={false}
+                        zoomOnPinch={false}
+                        zoomOnDoubleClick={false}
+                        onInit={this.getViewInstance}
+                        nodeTypes={nodeTypes}
+                        minZoom={0.01}
+                    ></ReactFlow>
+                    <div style={{ position: "relative", left: -15, bottom: 45, textAlign: "right" }}>
+                        <a className="editFlowButton" onClick={this.handleShow} key={this.props.id + "-edit-button"}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" height="1.3em" width="1.3em">
+                                <path fill="currentColor" d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z" />
+                            </svg>
+                        </a>
+                    </div>
+
                 </ReactFlowProvider>
 
             </div>
@@ -222,6 +304,11 @@ DataFlow.propTypes = {
      * The value displayed in the input.
      */
     edges: PropTypes.array.isRequired,
+
+    /**
+     * The value displayed in the input.
+     */
+    meta: PropTypes.object.isRequired,    
 
     /**
      * Dash-assigned callback that should be called to report property changes
