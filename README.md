@@ -17,7 +17,7 @@ If you have selected install_dependencies during the prompt, you can skip this p
 
 1. Install npm packages
     ```
-    $ npm install
+    $ npm install --legacy-peer-deps
     ```
 2. Create a virtual env and activate.
     ```

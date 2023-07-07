@@ -11,7 +11,7 @@ import 'reactflow/dist/style.css';
 import nodeTypes from "./nodes/nodeTypes"
 
 import SideBar from './SideBar.react';
-import { apply } from 'ramda';
+import { apply, prop } from 'ramda';
 import Modal from 'react-bootstrap/Modal';
 import { ModalBody } from 'react-bootstrap';
 
@@ -67,12 +67,26 @@ export default class DataFlow extends Component {
 
         this.setProps = props.setProps;
 
+        if (props.graphType === "singleOutput") {
+            const nr_output_nodes = props.nodes.filter((el) => el.type === 'out').length;
+            console.log(nr_output_nodes)
+
+            if (nr_output_nodes == 0) {
+                props.nodes.push({
+                    id: "out",
+                    type: "out"
+                })
+            }
+
+        }
+
 
         this.state = {
             id: props.id,
             eNodes: props.nodes,
             eEdges: props.edges,
             showFlowModal: false,
+            meta: props.meta,
             ...this.update_internal_nodes(props.nodes, props.edges)
         };
         console.log(this.state);
@@ -82,7 +96,11 @@ export default class DataFlow extends Component {
 
         const int_ids = props.nodes.map(el => parseInt(el.id.replace(/\D/g, '')));
 
-        this.ids = Math.max(...int_ids) + 1;
+        if (int_ids.length == 0) {
+            this.ids = 0;
+        } else {
+            this.ids = Math.max(...int_ids) + 1;
+        }
     }
 
     onConnect = (edge_to_add) => {
@@ -235,11 +253,11 @@ export default class DataFlow extends Component {
                         <Modal.Header closeButton>
                             <Modal.Title>DataFlow</Modal.Title>
                         </Modal.Header>
-                        <Modal.Body style={{ width: '100%', height: 500, padding: 0, top: -25, position: "relative" }} ref={this.reactFlowDiv}>
+                        <Modal.Body style={{ width: '100%', height: 500, padding: 0 }} ref={this.reactFlowDiv}>
 
-                            <SideBar />
+                            <SideBar nodeTypes={this.props.nodeTypes} graphType={this.props.graphType} />
                             <ReactFlow
-                                nodes={nodes.map((el) => { return { ...el, editable: true } })}
+                                nodes={nodes.map((el) => { return { ...el, editable: true, meta: this.state.meta, main:this } })}
                                 edges={edges}
                                 onNodesChange={this.onNodesChange}
                                 onEdgesChange={this.onEdgesChange}
@@ -259,7 +277,7 @@ export default class DataFlow extends Component {
                 </ReactFlowProvider>
                 <ReactFlowProvider>
                     <ReactFlow
-                        nodes={nodes}
+                        nodes={nodes.map((el) => { return { ...el, editable: false, meta: this.state.meta, main:this } })}
                         edges={edges}
                         fitView
                         nodesDraggable={false}
@@ -287,7 +305,12 @@ export default class DataFlow extends Component {
     }
 }
 
-DataFlow.defaultProps = {};
+DataFlow.defaultProps = {
+    nodeTypes: ["db", "merge", "filter", "trafo", "plot"],
+    graphType: "multiPlot",
+    nodes: [],
+    edges: []
+};
 
 DataFlow.propTypes = {
     /**
@@ -296,19 +319,29 @@ DataFlow.propTypes = {
     id: PropTypes.string,
 
     /**
-     * A label that will be printed when this component is rendered.
-     */
-    nodes: PropTypes.array.isRequired,
-
-    /**
-     * The value displayed in the input.
-     */
-    edges: PropTypes.array.isRequired,
-
-    /**
-     * The value displayed in the input.
+     * Metadata dictionary of the available databases
      */
     meta: PropTypes.object.isRequired,    
+
+    /**
+     * Array of nodes
+     */
+    nodes: PropTypes.array,
+
+    /**
+     * Array of edges connecting the nodes
+     */
+    edges: PropTypes.array,
+
+    /**
+     * Metadata dictionary of the available databases
+     */
+    nodeTypes: PropTypes.arrayOf(PropTypes.string),
+
+    /**
+     * Type of the graph structure [singleOutput, multiPlot]
+     */
+    graphType: PropTypes.string,
 
     /**
      * Dash-assigned callback that should be called to report property changes

@@ -22,7 +22,8 @@
     "dagre": "^0.8.5",
     "fs": "^0.0.1-security",
     "ramda": "^0.26.1",
-    "react-bootstrap": "^2.8.0"
+    "react-bootstrap": "^2.8.0",
+    "react-select": "^5.7.3"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",

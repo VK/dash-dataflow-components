@@ -30,12 +30,19 @@ app = Dash(
 app.layout = html.Div([
     ddc.DataFlow(
         id='flow',
-        nodes=  [{'id': 'n102', 'type': 'merge'}, {'id': 'n101', 'type': 'db'}, {'id': 'n100', 'type': 'db'}, {'id': '1', 'type': 'db'}, {'id': '2', 'type': 'merge'}, {'id': '3', 'type': 'filter'}, {'id': '4', 'type': 'out'}],
-        edges = [{'source': '1', 'target': '2', 'sourceHandle': 'o', 'targetHandle': 'i1'}, {'source': 'n100', 'target': '2', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': '3', 'target': '4', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': '2', 'target': 'n102', 'sourceHandle': 'o', 'targetHandle': 'i1'}, {'source': 'n101', 'target': 'n102', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n102', 'target': '3', 'sourceHandle': 'o', 'targetHandle': 'i'}],
         meta = dataframe_meta
         ),
     html.Div(id="node_out"),
     html.Div(id="edge_out"),
+
+    ddc.DataFlow(
+        id='flow2',
+        nodes=[{'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'adsfs'}}],
+        edges=[{'source': 'n0', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}], 
+        nodeTypes = ["db", "filter", "merge"],
+        graphType = "singleOutput",
+        meta = dataframe_meta
+        )
 ], style={"width": "400px", "height": "400px"})
 
 
