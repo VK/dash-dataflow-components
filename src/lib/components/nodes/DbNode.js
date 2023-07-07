@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
 import Modal from 'react-bootstrap/Modal';
 import Select from 'react-select'
+import Table from 'react-bootstrap/Table';
 
 
 const DbNode = ({ data, isConnectable, id }) => {
@@ -16,19 +17,26 @@ const DbNode = ({ data, isConnectable, id }) => {
     db_options = Object.keys(this_node.meta).map((el) => { return { value: el, label: el } });
   }
   let default_value = undefined;
-  const matching_options = db_options.filter((el) => el.value === data.name);
-  if (matching_options.length == 1) {
-    default_value = matching_options[0];
+  if (data != undefined) {
+    const matching_options = db_options.filter((el) => el.value === data.name);
+    if (matching_options.length == 1) {
+      default_value = matching_options[0];
+    }
   }
 
-  console.log(db_options);
-  console.log(default_value);
+  let update_state = () => {
+    let new_nodes = this_node.main.state.nodes.map((el) => (el.id == this_node.id) ? { ...el, data: { "name": default_value.value }, out_meta: this_node.meta[default_value.value] } : el);
+
+    this_node.main.setState({ nodes: new_nodes });
+  }
+
+
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: (this_node.editable) ? 180 : 130 }}>
 
       {this_node.editable &&
-        <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1 }}>
+        <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1, background: "#fff" }}>
           <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setIsOpen(true)}><span className="fas fa-edit" aria-hidden="true"></span></button>
           <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => {
             instance.deleteElements({ nodes: [this_node] })
@@ -39,7 +47,7 @@ const DbNode = ({ data, isConnectable, id }) => {
       <div className="card-body p-0">
         <h5 className="card-title m-0">
           <svg xmlns="http://www.w3.org/2000/svg" height="16" className="mx-1 mb-1" viewBox="0 0 448 512"><path d="M448 80v48c0 44.2-100.3 80-224 80S0 172.2 0 128V80C0 35.8 100.3 0 224 0S448 35.8 448 80zM393.2 214.7c20.8-7.4 39.9-16.9 54.8-28.6V288c0 44.2-100.3 80-224 80S0 332.2 0 288V186.1c14.9 11.8 34 21.2 54.8 28.6C99.7 230.7 159.5 240 224 240s124.3-9.3 169.2-25.3zM0 346.1c14.9 11.8 34 21.2 54.8 28.6C99.7 390.7 159.5 400 224 400s124.3-9.3 169.2-25.3c20.8-7.4 39.9-16.9 54.8-28.6V432c0 44.2-100.3 80-224 80S0 476.2 0 432V346.1z" /></svg>
-          DB</h5>
+          {(default_value == undefined) ? "DB" : default_value.label}</h5>
       </div>
 
       <Handle type="source" position={Position.Bottom} id="o" isConnectable={isConnectable} />
@@ -59,7 +67,33 @@ const DbNode = ({ data, isConnectable, id }) => {
 
           <Select options={db_options}
             defaultValue={default_value}
-            onChange={(choice) => {console.log(choice)}} />
+            onChange={(choice) => {
+              default_value = choice;
+              update_state();
+            }} />
+
+          {(default_value !== undefined && default_value.value in this_node.meta) &&
+            <div style={{ maxHeight: 200, overflowY: "scroll" }} className='mt-2' >
+              <Table striped bordered hover >
+                <thead>
+                  <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(this_node.meta[default_value.value]).map((k) => (
+
+                    <tr key={k} >
+                      <td>{k}</td>
+                      <td>{this_node.meta[default_value.value][k].type}</td>
+                    </tr>)
+
+                  )}
+
+                </tbody>
+              </Table></div>
+          }
 
 
         </Modal.Body>

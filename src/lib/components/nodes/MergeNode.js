@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
+import SingleHandle from './SingleHandle';
 
 const handleLeft = { left: "calc(50% - 40px)" };
 const handleRight = { left: "calc(50% + 40px)" };
@@ -10,12 +11,16 @@ const MergeNode = ({ data, isConnectable, id }) => {
 
   const instance = useReactFlow();
   const this_node = instance.getNodes().filter((node) => node.id == id)[0];
+  const input_edges = instance.getEdges().filter((edge) => edge.target == id).map((edge) => edge.source);
+  const input_nodes = instance.getNodes().filter((node) => input_edges.includes(node.id) );
+
+  console.log(input_edges, input_nodes);
 
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: (this_node.editable) ? 180 : 130 }}>
-      <Handle type="target" position={Position.Top} style={handleLeft} id="i1" isConnectable={isConnectable} />
-      <Handle type="target" position={Position.Top} style={handleRight} id="i2" isConnectable={isConnectable} />
+      <SingleHandle type="target" position={Position.Top} style={handleLeft} id="i1" isConnectable={isConnectable} maxconnections={2} />
+      <SingleHandle type="target" position={Position.Top} style={handleRight} id="i2" isConnectable={isConnectable} maxconnections={2} />
 
       {this_node.editable &&
         <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1 }}>

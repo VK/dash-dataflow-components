@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
+import SingleHandle from './SingleHandle';
 
 
 
@@ -10,7 +11,7 @@ const FilterNode = ({ data, isConnectable, id }) => {
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: (this_node.editable) ? 180 : 130 }}>
-      <Handle type="target" position={Position.Top} id="i" isConnectable={isConnectable} />
+      <SingleHandle type="target" position={Position.Top} id="i" isConnectable={isConnectable} />
 
       <div className="btn-group p-1" style={{ position: "absolute", "top": 1, "right": 1 }}>
         <button type="button" className="btn btn-outline-secondary btn-sm"><span className="fas fa-edit" aria-hidden="true"></span></button>

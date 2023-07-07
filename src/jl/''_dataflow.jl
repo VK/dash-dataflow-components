@@ -13,12 +13,14 @@ It renders an input with the property `value`
 which is editable by the user.
 Keyword arguments:
 - `id` (String; optional): The ID used to identify this component in Dash callbacks.
-- `edges` (Array; required): The value displayed in the input.
-- `meta` (Dict; required): The value displayed in the input.
-- `nodes` (Array; required): A label that will be printed when this component is rendered.
+- `edges` (Array; optional): Array of edges connecting the nodes
+- `graphType` (String; optional): Type of the graph structure [singleOutput, multiPlot]
+- `meta` (Dict; required): Metadata dictionary of the available databases
+- `nodeTypes` (Array of Strings; optional): Metadata dictionary of the available databases
+- `nodes` (Array; optional): Array of nodes
 """
 function ''_dataflow(; kwargs...)
-        available_props = Symbol[:id, :edges, :meta, :nodes]
+        available_props = Symbol[:id, :edges, :graphType, :meta, :nodeTypes, :nodes]
         wild_props = Symbol[]
         return Component("''_dataflow", "DataFlow", "dash_dataflow_components", available_props, wild_props; kwargs...)
 end

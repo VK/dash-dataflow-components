@@ -44,7 +44,6 @@ export default class DataFlow extends Component {
         g.nodes().forEach(function (v) {
             let el = g.node(v);
             if (el && el !== undefined) {
-                console.log("Node " + v + ": " + JSON.stringify(el));
                 positions[el.label] = { x: el.x, y: el.y };
             }
         });
@@ -55,7 +54,7 @@ export default class DataFlow extends Component {
         }
     }
     get_external_nodes = (nodes) => {
-        return nodes.map((el) => { return { id: el.id, type: el.type } })
+        return nodes.map((el) => { return { id: el.id, type: el.type, data: el.data } })
     }
     get_external_edges = (edges) => {
         const node_ids = this.state.nodes.map((el) => el.id);
@@ -69,7 +68,6 @@ export default class DataFlow extends Component {
 
         if (props.graphType === "singleOutput") {
             const nr_output_nodes = props.nodes.filter((el) => el.type === 'out').length;
-            console.log(nr_output_nodes)
 
             if (nr_output_nodes == 0) {
                 props.nodes.push({
@@ -89,12 +87,11 @@ export default class DataFlow extends Component {
             meta: props.meta,
             ...this.update_internal_nodes(props.nodes, props.edges)
         };
-        console.log(this.state);
 
         this.reactFlowWrapper = React.createRef();
         this.reactFlowDiv = React.createRef();
 
-        const int_ids = props.nodes.map(el => parseInt(el.id.replace(/\D/g, '')));
+        const int_ids = props.nodes.map(el => parseInt(el.id.replace(/\D/g, ''))).filter(el => el == el);
 
         if (int_ids.length == 0) {
             this.ids = 0;
@@ -211,7 +208,6 @@ export default class DataFlow extends Component {
 
     }
     handleShow = (e) => {
-        console.log(e);
         this.setState({ showFlowModal: true });
     }
 
@@ -257,7 +253,7 @@ export default class DataFlow extends Component {
 
                             <SideBar nodeTypes={this.props.nodeTypes} graphType={this.props.graphType} />
                             <ReactFlow
-                                nodes={nodes.map((el) => { return { ...el, editable: true, meta: this.state.meta, main:this } })}
+                                nodes={nodes.map((el) => { return { ...el, editable: true, meta: this.state.meta, main: this } })}
                                 edges={edges}
                                 onNodesChange={this.onNodesChange}
                                 onEdgesChange={this.onEdgesChange}
@@ -277,7 +273,7 @@ export default class DataFlow extends Component {
                 </ReactFlowProvider>
                 <ReactFlowProvider>
                     <ReactFlow
-                        nodes={nodes.map((el) => { return { ...el, editable: false, meta: this.state.meta, main:this } })}
+                        nodes={nodes.map((el) => { return { ...el, editable: false, meta: this.state.meta, main: this } })}
                         edges={edges}
                         fitView
                         nodesDraggable={false}
@@ -321,7 +317,7 @@ DataFlow.propTypes = {
     /**
      * Metadata dictionary of the available databases
      */
-    meta: PropTypes.object.isRequired,    
+    meta: PropTypes.object.isRequired,
 
     /**
      * Array of nodes

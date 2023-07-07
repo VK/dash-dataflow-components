@@ -10,17 +10,22 @@ ExampleComponent is an example component. It takes a property, `label`, and di
 }
 
 \usage{
-''DataFlow(id=NULL, edges=NULL, meta=NULL, nodes=NULL)
+''DataFlow(id=NULL, edges=NULL, graphType=NULL, meta=NULL,
+nodeTypes=NULL, nodes=NULL)
 }
 
 \arguments{
 \item{id}{Character. The ID used to identify this component in Dash callbacks.}
 
-\item{edges}{Unnamed list. The value displayed in the input.}
+\item{edges}{Unnamed list. Array of edges connecting the nodes}
 
-\item{meta}{Named list. The value displayed in the input.}
+\item{graphType}{Character. Type of the graph structure [singleOutput, multiPlot]}
 
-\item{nodes}{Unnamed list. A label that will be printed when this component is rendered.}
+\item{meta}{Named list. Metadata dictionary of the available databases}
+
+\item{nodeTypes}{List of characters. Metadata dictionary of the available databases}
+
+\item{nodes}{Unnamed list. Array of nodes}
 }
 
 \value{named list of JSON elements corresponding to React.js properties and their values}
