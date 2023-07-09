@@ -1,4 +1,5 @@
 import dash_dataflow_components as ddc
+import dash_express_components as dxc
 from dash import Dash, html, Input, Output, callback
 
 
@@ -28,6 +29,7 @@ app = Dash(
 )
 
 app.layout = html.Div([
+    # dxc.Configurator(id="testfiler", meta=dataframe_meta["gapminder_extra_long"], config={}),
     ddc.DataFlow(
         id='flow',
         meta = dataframe_meta
@@ -37,8 +39,8 @@ app.layout = html.Div([
 
     ddc.DataFlow(
         id='flow_2',
-        nodes=[{'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge', 'data': {'label': 'merge node'}}, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}],
-        edges= [{'source': 'n0', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i1'}, {'source': 'n1', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n2', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i2'}], 
+        nodes=[{'id': 'n3', 'type': 'filter', 'data':{'config':[{"col": "country", "type": "isin", "value": []}]}}, {'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge', 'data': {'label': 'merge node'}}, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}],
+        edges= [{'source': 'n1', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n2', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n0', 'target': 'n3', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n3', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i1'}], 
         nodeTypes = ["db", "filter", "merge"],
         graphType = "singleOutput",
         meta = dataframe_meta

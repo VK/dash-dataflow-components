@@ -2,7 +2,14 @@ import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
 import SingleHandle from './SingleHandle';
 
-const TrafoNode = ({ data, isConnectable, id }) => {
+
+const getMetaOut = (id, allmeta, data, inputs) => {
+  return allmeta[data.value];
+}
+
+
+
+const getNode = ({ data, isConnectable, id }) => {
   const instance = useReactFlow();
   const this_node = instance.getNodes().filter((node) => node.id == id)[0];
 
@@ -30,4 +37,5 @@ const TrafoNode = ({ data, isConnectable, id }) => {
 
 }
 
-export default memo(TrafoNode);
+const exportNode = memo(getNode)
+export {getMetaOut, exportNode};

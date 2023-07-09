@@ -5,16 +5,38 @@ import SingleHandle from './SingleHandle';
 const handleLeft = { left: "calc(50% - 40px)" };
 const handleRight = { left: "calc(50% + 40px)" };
 
+const getMetaOut = (id, allmeta, data, inputs) => {
+  const input_ids = inputs.map((e) => e.source);
+
+  if (input_ids.length == 2) {
 
 
-const MergeNode = ({ data, isConnectable, id }) => {
+  }
+  return {};
+}
+
+
+
+
+const getNode = ({ data, isConnectable, id }) => {
 
   const instance = useReactFlow();
   const this_node = instance.getNodes().filter((node) => node.id == id)[0];
-  const input_edges = instance.getEdges().filter((edge) => edge.target == id).map((edge) => edge.source);
-  const input_nodes = instance.getNodes().filter((node) => input_edges.includes(node.id) );
+  const input_edges = instance.getEdges().filter((edge) => edge.target == id);
+  const possible_nodes = instance.getNodes()
+  
+  
+  const meta_dict = input_edges.reduce((acc, edge) => {
+    const { source, targetHandle } = edge;
 
-  console.log(input_edges, input_nodes);
+    const node = possible_nodes.filter((n) => n.id == source);
+    if (node.length == 1) {
+      acc[targetHandle] = this_node.meta[source];
+    }
+    return acc;
+  }, {});
+
+  console.log("meta_dict", meta_dict);
 
 
   return (
@@ -45,4 +67,5 @@ const MergeNode = ({ data, isConnectable, id }) => {
 
 }
 
-export default memo(MergeNode);
+const exportNode = memo(getNode)
+export {getMetaOut, exportNode};

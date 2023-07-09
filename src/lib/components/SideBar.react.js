@@ -13,7 +13,7 @@ const SideBar = (props) => {
   };
 
   return (
-    <div style={{ width: 0, height: 0, position: "relative", zIndex: 10000, top: 15, left: 15, display: "revert" }} className='btn-group-vertical'>
+    <div style={{ width: 0, height: 0, position: "relative", zIndex: 100, top: 15, left: 15, display: "revert" }} className='btn-group-vertical'>
 
       {(props.nodeTypes.includes("db")) &&
         <button type="button" className="btn btn-outline-secondary" onDragStart={(event) => onDragStart(event, 'db')} draggable style={button_style}>

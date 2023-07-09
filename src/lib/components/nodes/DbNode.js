@@ -5,9 +5,21 @@ import Select from 'react-select'
 import Table from 'react-bootstrap/Table';
 
 
-const DbNode = ({ data, isConnectable, id }) => {
-  const instance = useReactFlow();
 
+const getMetaOut = (id, allmeta, data, inputs) => {
+
+  if (data && "name" in data) {
+    return allmeta[data.name];
+
+  }
+  else {
+    return {};
+  }
+}
+
+
+const getNode = ({ data, isConnectable, id }) => {
+  const instance = useReactFlow();
   const [modalIsOpen, setIsOpen] = React.useState(false);
   const this_node = instance.getNodes().filter((node) => node.id == id)[0];
 
@@ -25,12 +37,9 @@ const DbNode = ({ data, isConnectable, id }) => {
   }
 
   let update_state = () => {
-    let new_nodes = this_node.main.state.nodes.map((el) => (el.id == this_node.id) ? { ...el, data: { "name": default_value.value }, out_meta: this_node.meta[default_value.value] } : el);
-
-    this_node.main.setState({ nodes: new_nodes });
+    let new_nodes = this_node.main.state.nodes.map((el) => (el.id == this_node.id) ? { ...el, data: { "name": default_value.value } } : el);
+    this_node.main.setState({ nodes: new_nodes }, () => this_node.main.updateOutput());
   }
-
-
 
   return (
     <div className="card p-2 border-secondary" style={{ minWidth: (this_node.editable) ? 180 : 130 }}>
@@ -105,4 +114,5 @@ const DbNode = ({ data, isConnectable, id }) => {
 
 }
 
-export default memo(DbNode);
+const exportNode = memo(getNode)
+export { getMetaOut, exportNode };

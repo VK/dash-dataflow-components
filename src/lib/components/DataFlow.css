@@ -1,0 +1,14 @@
+.modal + .modal-backdrop {
+  visibility: hidden;
+}
+
+
+body .modal:not(:last-child) {
+  visibility: hidden !important;
+}
+
+
+body .modal:not(:last-child) .react-flow__node{
+  visibility: hidden !important;
+}
+

@@ -7,13 +7,13 @@ import { applyNodeChanges, applyEdgeChanges, isEdge, addEdge, setNodes } from 'r
 import dagre from 'dagre';
 
 import 'reactflow/dist/style.css';
+import './DataFlow.css'
 
-import nodeTypes from "./nodes/nodeTypes"
+import { metaGetters, nodeTypes } from "./nodes"
 
 import SideBar from './SideBar.react';
-import { apply, prop } from 'ramda';
 import Modal from 'react-bootstrap/Modal';
-import { ModalBody } from 'react-bootstrap';
+
 
 
 
@@ -48,8 +48,14 @@ export default class DataFlow extends Component {
             }
         });
 
+        const out_nodes = nodes.map((el) => { return { ...el, position: positions[el.id] } });
+        const nodes_editable = out_nodes.map((el) => { return { ...el, editable: true, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } });
+        const nodes_fixed = out_nodes.map((el) => { return { ...el, editable: false, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } });
+
         return {
-            nodes: nodes.map((el) => { return { ...el, position: positions[el.id] } }),
+            nodes: out_nodes,
+            nodes_editable: nodes_editable,
+            nodes_fixed: nodes_fixed,
             edges: edges.map((el) => { return { ...el, id: el.source + el.sourceHandle + "-" + el.target + el.targetHandle, animated: true } })
         }
     }
@@ -85,10 +91,14 @@ export default class DataFlow extends Component {
             eEdges: props.edges,
             showFlowModal: false,
             meta: props.meta,
-            ...this.update_internal_nodes(props.nodes, props.edges)
+            outputMetas: { ...props.meta },
         };
 
-        this.reactFlowWrapper = React.createRef();
+        this.state = {
+            ...this.state,
+            ...this.update_internal_nodes(props.nodes, props.edges)
+        }
+
         this.reactFlowDiv = React.createRef();
 
         const int_ids = props.nodes.map(el => parseInt(el.id.replace(/\D/g, ''))).filter(el => el == el);
@@ -97,6 +107,13 @@ export default class DataFlow extends Component {
             this.ids = 0;
         } else {
             this.ids = Math.max(...int_ids) + 1;
+        }
+
+        this.state.outputMetas = this.getOutputMetas();
+
+        this.state = {
+            ...this.state,
+            ...this.update_internal_nodes(props.nodes, props.edges)
         }
     }
 
@@ -110,17 +127,20 @@ export default class DataFlow extends Component {
         this.setState({
             edges: new_edges
         })
-        // if (this.setProps) this.setProps({
-        //     edges: this.get_external_edges(new_edges)
-        // })
+
     }
 
     onNodesChange = (nodes) => {
         const new_nodes = applyNodeChanges(nodes, this.state.nodes);
 
+        const nodes_editable = new_nodes.map((el) => { return { ...el, editable: true, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } });
+        const nodes_fixed = new_nodes.map((el) => { return { ...el, editable: false, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } })
+
 
         this.setState({
-            nodes: new_nodes
+            nodes: new_nodes,
+            nodes_editable: nodes_editable,
+            nodes_fixed: nodes_fixed
         })
         // if (this.setProps) this.setProps({
         //     nodes: this.get_external_nodes(new_nodes)
@@ -175,8 +195,7 @@ export default class DataFlow extends Component {
         const newNode = {
             id: this.getId(),
             type,
-            position,
-            data: { label: `${type} node` },
+            position
         };
 
         this.onNodesChange([{ item: newNode, type: "add" }]);
@@ -219,6 +238,50 @@ export default class DataFlow extends Component {
     }
 
 
+    getOutputMetas = () => {
+
+        let new_outputMetas = {}
+
+        // first all db nodes get trivial meta output
+        this.state.nodes.filter((n) => n.type === "db").forEach((n) => {
+            new_outputMetas[n.id] = metaGetters[n.type](n.id, this.state.meta, n.data, [])
+        });
+
+        let added = 1;
+        while (added) {
+            added = 0;
+
+            this.state.nodes.filter((n) => !(n.id in new_outputMetas)).forEach((n) => {
+
+                let inputs = this.state.edges.filter((e) => e.target === n.id);
+                let known = inputs.map((e) => e.source).map((t) => t in new_outputMetas);
+
+
+                if (known.every(Boolean) && n.type in metaGetters) {
+                    added++;
+                    new_outputMetas[n.id] = metaGetters[n.type](n.id, new_outputMetas, n.data, inputs)
+                }
+            });
+
+        }
+
+        return { ...this.state.meta, ...new_outputMetas };
+    }
+
+    updateOutput = () => {
+
+        const new_edge_state = this.update_internal_nodes(this.state.nodes, this.state.edges);
+
+
+        this.setState({ ...new_edge_state, outputMetas: this.getOutputMetas() })
+
+        if (this.setProps) this.setProps({
+            edges: this.get_external_edges(new_edge_state.edges),
+            nodes: this.get_external_nodes(new_edge_state.nodes),
+        })
+    }
+
+
     /**
      * if the plot config changes and the extra plotApi should be used
      * Then we have to update the content
@@ -231,10 +294,10 @@ export default class DataFlow extends Component {
     }
 
     render() {
-        const { id, nodes, edges, showFlowModal } = this.state;
+        const { id, edges, showFlowModal, nodes_fixed, nodes_editable } = this.state;
 
         return (
-            <div id={id} style={{ width: '100%', height: '100%' }} ref={this.reactFlowWrapper}>
+            <div id={id} style={{ width: '100%', height: '100%' }} >
                 <ReactFlowProvider>
 
                     <Modal
@@ -244,7 +307,7 @@ export default class DataFlow extends Component {
                         show={showFlowModal}
                         onHide={() => this.handleClose()
                         }
-                        size="lg"
+                        size="xl"
                     >
                         <Modal.Header closeButton>
                             <Modal.Title>DataFlow</Modal.Title>
@@ -253,7 +316,7 @@ export default class DataFlow extends Component {
 
                             <SideBar nodeTypes={this.props.nodeTypes} graphType={this.props.graphType} />
                             <ReactFlow
-                                nodes={nodes.map((el) => { return { ...el, editable: true, meta: this.state.meta, main: this } })}
+                                nodes={nodes_editable}
                                 edges={edges}
                                 onNodesChange={this.onNodesChange}
                                 onEdgesChange={this.onEdgesChange}
@@ -273,7 +336,7 @@ export default class DataFlow extends Component {
                 </ReactFlowProvider>
                 <ReactFlowProvider>
                     <ReactFlow
-                        nodes={nodes.map((el) => { return { ...el, editable: false, meta: this.state.meta, main: this } })}
+                        nodes={nodes_fixed}
                         edges={edges}
                         fitView
                         nodesDraggable={false}
