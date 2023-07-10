@@ -286,7 +286,6 @@ dash_dataflow_components/*
 !dash_dataflow_components/transformationtypes/
 
 
-
 /dash_dataflow_components
 /deps
 /inst

@@ -35,10 +35,23 @@ export default class DataFlow extends Component {
         // Default to assigning a new object as a label for each new edge.
         g.setDefaultEdgeLabel(function () { return {}; });
 
-        console.log(nodes);
+        //nodes that connect to a merge node
+        const nodes_L = edges.filter((e) => e.targetHandle == "i1").map((e) => e.source);
+        const nodes_R = edges.filter((e) => e.targetHandle == "i2").map((e) => e.source);
 
-        nodes.forEach((el) => { g.setNode(el.id, { label: el.id, width: 150, height: 36 }); });
-        edges.forEach((el) => { g.setEdge(el.source, el.target); });
+        let counter = 0;
+        let id_map_A = {};
+        let id_map_B = {};
+
+        nodes.filter((n) => nodes_L.includes(n.id)).forEach((el) => { id_map_A[el.id] = counter; id_map_B[counter] = el.id; counter++; });
+        nodes.filter((n) => !nodes_L.includes(n.id) && !nodes_R.includes(n.id)).forEach((el) => { id_map_A[el.id] = counter; id_map_B[counter] = el.id; counter++; });
+        nodes.filter((n) => nodes_R.includes(n.id)).forEach((el) => { id_map_A[el.id] = counter; id_map_B[counter] = el.id; counter++; });
+
+
+        nodes.forEach((el) => { g.setNode(id_map_A[el.id], { label: id_map_A[el.id], width: 130, height: 36 }); });
+
+
+        edges.forEach((el) => { g.setEdge(id_map_A[el.source], id_map_A[el.target]); });
 
         dagre.layout(g);
 
@@ -46,7 +59,7 @@ export default class DataFlow extends Component {
         g.nodes().forEach(function (v) {
             let el = g.node(v);
             if (el && el !== undefined) {
-                positions[el.label] = { x: el.x, y: el.y };
+                positions[id_map_B[el.label]] = { x: el.x, y: el.y };
             }
         });
 
@@ -229,7 +242,15 @@ export default class DataFlow extends Component {
 
     }
     handleShow = (e) => {
-        this.setState({ showFlowModal: true });
+
+        let that = this;
+
+        this.setState({ showFlowModal: true }, () => {
+              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 10);
+              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 20);
+              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 100);
+
+        });
     }
 
     getInstance = (i) => {
@@ -272,8 +293,21 @@ export default class DataFlow extends Component {
 
     updateOutput = () => {
 
-        const new_edge_state = this.update_internal_nodes(this.state.nodes, this.state.edges);
+        const nodes_editable = this.state.nodes.map((el) => { return { ...el, editable: true, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } });
+        const nodes_fixed = this.state.nodes.map((el) => { return { ...el, editable: false, meta: (el.type === "db") ? this.state.meta : this.state.outputMetas, main: this } });
 
+        this.setState({
+
+            nodes_editable: nodes_editable,
+            nodes_fixed: nodes_fixed,
+            outputMetas: this.getOutputMetas()
+        })
+
+
+    }
+
+    updateLayout = () => {
+        const new_edge_state = this.update_internal_nodes(this.state.nodes, this.state.edges);
 
         this.setState({ ...new_edge_state, outputMetas: this.getOutputMetas() })
 
@@ -281,6 +315,13 @@ export default class DataFlow extends Component {
             edges: this.get_external_edges(new_edge_state.edges),
             nodes: this.get_external_nodes(new_edge_state.nodes),
         })
+
+        let viewA = this.state.viewInstance;
+        let viewB = this.state.instance;
+
+        setTimeout(() => { viewA.fitView({ duration: 200 }); viewB.fitView({ duration: 200, maxZoom: 1.0 }) }, 100);
+
+
     }
 
 
@@ -316,7 +357,7 @@ export default class DataFlow extends Component {
                         </Modal.Header>
                         <Modal.Body style={{ width: '100%', height: 500, padding: 0 }} ref={this.reactFlowDiv}>
 
-                            <SideBar nodeTypes={this.props.nodeTypes} graphType={this.props.graphType} />
+                            <SideBar nodeTypes={this.props.nodeTypes} graphType={this.props.graphType} main={this} />
                             <ReactFlow
                                 nodes={nodes_editable}
                                 edges={edges}
@@ -328,7 +369,6 @@ export default class DataFlow extends Component {
                                 onDragOver={this.onDragOver}
                                 onInit={this.getInstance}
                                 minZoom={0.01}
-                                fitView
                             >
                                 <Controls />
                             </ReactFlow>
@@ -409,3 +449,4 @@ DataFlow.propTypes = {
      */
     setProps: PropTypes.func
 };
+
