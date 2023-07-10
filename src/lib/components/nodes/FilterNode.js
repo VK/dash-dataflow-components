@@ -7,10 +7,10 @@ const getMetaOut = (id, allmeta, data, inputs) => {
 
   const input_ids = inputs.map((e) => e.source);
 
-  if (input_ids.length == 1) {
+  if (input_ids.length == 1 && input_ids[0] in allmeta) {
+    const in_meta = allmeta[input_ids[0]];
 
-    if (input_ids[0] in allmeta && data && "config" in data) {
-      const in_meta = allmeta[input_ids[0]];
+    if (data && "config" in data) {
 
       const f = new dash_express_components.Filter(
         {
@@ -22,7 +22,10 @@ const getMetaOut = (id, allmeta, data, inputs) => {
 
       return f.state.meta_out;
     }
+
+    return in_meta;
   }
+
   return {};
 }
 

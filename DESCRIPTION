@@ -1,6 +1,6 @@
 Package: dashDataflowComponents
 Title: Components that create easy to use editable dataflows.
-Version: 0.0.1
+Version: 0.0.2
 Description: Components that create easy to use editable dataflows.
 Depends: R (>= 3.0.2)
 Imports: 
