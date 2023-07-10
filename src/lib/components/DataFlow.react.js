@@ -35,7 +35,9 @@ export default class DataFlow extends Component {
         // Default to assigning a new object as a label for each new edge.
         g.setDefaultEdgeLabel(function () { return {}; });
 
-        nodes.forEach((el) => { g.setNode(el.id, { label: el.id, width: 200, height: 36 }); });
+        console.log(nodes);
+
+        nodes.forEach((el) => { g.setNode(el.id, { label: el.id, width: 150, height: 36 }); });
         edges.forEach((el) => { g.setEdge(el.source, el.target); });
 
         dagre.layout(g);
@@ -328,7 +330,6 @@ export default class DataFlow extends Component {
                                 minZoom={0.01}
                                 fitView
                             >
-                                <MiniMap zoomable pannable />
                                 <Controls />
                             </ReactFlow>
                         </Modal.Body>

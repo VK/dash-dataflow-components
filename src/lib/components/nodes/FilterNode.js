@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Handle, Position, useReactFlow } from 'reactflow';
 import SingleHandle from './SingleHandle';
 import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
 
 const getMetaOut = (id, allmeta, data, inputs) => {
 
@@ -63,7 +64,7 @@ const getNode = ({ data, isConnectable, id }) => {
       <div className="card-body p-0">
         <h5 className="card-title m-0">
           <svg xmlns="http://www.w3.org/2000/svg" height="16" className="mx-1 mb-1" viewBox="0 0 512 512"><path d="M3.9 54.9C10.5 40.9 24.5 32 40 32H472c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9V448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6V320.9L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z" /></svg>
-          Filter</h5>
+          {(data && data.label) ? data.label : "Filter"}</h5>
       </div>
 
       <Handle type="source" position={Position.Bottom} id="o" isConnectable={isConnectable} />
@@ -76,9 +77,24 @@ const getNode = ({ data, isConnectable, id }) => {
         onHide={() => setIsOpen(false)}
         enforceFocus={true}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Filter</Modal.Title>
+
+<Modal.Header closeButton>
+          {this_node.editable && <Modal.Title>
+            <div class="input-group input-group-lg">
+              <div class="input-group-prepend">
+                <span class="input-group-text h-100" id="inputGroupPrepend">Label</span>
+              </div>
+              <Form.Control style={{ fontWeight: 700, fontSize: "1.5rem" }} size="lg" placeholder="Filter" value={(data && "label" in data) ? data.label : ''} onChange={(e) => {
+                let val = e.target.value;
+                let new_nodes = this_node.main.state.nodes.map((el) => (el.id == this_node.id) ? { ...el, data: { ...data, label: (val != "") ? val : undefined } } : el);
+                this_node.main.setState({ nodes: new_nodes }, () => this_node.main.updateOutput());
+              }} /> </div>
+          </Modal.Title>}
+          {!this_node.editable && <Modal.Title>{(data && data.label) ? data.label : "Filter"}</Modal.Title>}
         </Modal.Header>
+
+        
+        
         <Modal.Body>
 
           <dash_express_components.Filter

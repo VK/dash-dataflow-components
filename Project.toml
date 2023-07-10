@@ -2,7 +2,7 @@
 name = "DashDataflowComponents"
 uuid = "1b08a953-4be3-4667-9a23-50cefaaa2677"
 authors = ["Viktor Krückl <viktor@krueckl.de>"]
-version = "0.0.2"
+version = "0.0.4"
 
 [deps]
 Dash = "1b08a953-4be3-4667-9a23-3db579824955"
