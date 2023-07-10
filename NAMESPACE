@@ -3,3 +3,4 @@
 export(''DataFlow)
 export(DashDataflowComponents)
 export(FlowDemo)
+export(dataFlow)

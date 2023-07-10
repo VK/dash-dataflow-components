@@ -39,7 +39,7 @@ app.layout = html.Div([
 
     ddc.DataFlow(
         id='flow_2',
-        nodes=[{'id': 'n3', 'type': 'filter', 'data':{'config':[{"col": "country", "type": "isin", "value": []}]}}, {'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge', 'data': {'label': 'merge node'}}, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}],
+        nodes=[{'id': 'n3', 'type': 'filter', 'data':{'config':[{"col": "country", "type": "isin", "value": []}]}}, {'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge',  'data': {'label': 'merge node',  'left_on': ['country'], 'right_on': ['country'], 'left_p': 'A', 'right_p': 'B', 'how': 'inner'} }, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}],
         edges= [{'source': 'n1', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n2', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n0', 'target': 'n3', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n3', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i1'}], 
         nodeTypes = ["db", "filter", "merge"],
         graphType = "singleOutput",
