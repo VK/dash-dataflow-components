@@ -82,5 +82,15 @@ def update_output_div(input_value):
     return f'Edges: {input_value} <br/>'
 
 
+@callback(
+    Output(component_id='flow_2', component_property='nodes'),
+    Output(component_id='flow_2', component_property='edges'),
+    Input(component_id='flow', component_property='nodes'),
+    Input(component_id='flow', component_property='edges')
+)
+def update_output_div(a,b):
+    return a,b
+
+
 if __name__ == '__main__':
     app.run_server(debug=True)

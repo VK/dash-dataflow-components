@@ -243,15 +243,20 @@ export default class DataFlow extends Component {
     }
     handleShow = (e) => {
 
-        let that = this;
+        let fitView = undefined;
 
+        if (this.state && "instance" in this.state && "fitView" in this.state.instance) {
+            fitView = this.state.instance.fitView;
+        }
         this.setState({ showFlowModal: true }, () => {
-              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 10);
-              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 20);
-              setTimeout(() => { that.state.instance.fitView({ maxZoom: 1.0 }) }, 100);
-
+            if (fitView) {
+                setTimeout(() => { fitView({ maxZoom: 1.0 }) }, 10);
+                setTimeout(() => { fitView({ maxZoom: 1.0 }) }, 20);
+                setTimeout(() => { fitView({ maxZoom: 1.0 }) }, 100);
+            }
         });
     }
+
 
     getInstance = (i) => {
         this.setState({ instance: i });
@@ -332,7 +337,43 @@ export default class DataFlow extends Component {
      */
     UNSAFE_componentWillReceiveProps(newProps) {
 
-        console.log(newProps);
+        let edges_json = (newProps.edges) ? JSON.stringify(newProps.edges) : JSON.stringify(this.state.eEdges);
+        let nodes_json = (newProps.nodes) ? JSON.stringify(newProps.nodes) : JSON.stringify(this.state.eNodes);
+
+        if (
+            (edges_json !== JSON.stringify(this.state.eEdges)) ||
+            (nodes_json !== JSON.stringify(this.state.eNodes))
+        ) {
+
+            let nodes = JSON.parse(nodes_json);
+            let edges = JSON.parse(edges_json);
+
+            this.setState({
+                eNodes: nodes,
+                eEdges: edges,
+                ...this.update_internal_nodes(nodes, edges)
+            }, () => {
+
+                let int_ids = nodes.map(el => parseInt(el.id.replace(/\D/g, ''))).filter(el => el == el);
+
+                if (int_ids.length == 0) {
+                    this.ids = 0;
+                } else {
+                    this.ids = Math.max(...int_ids) + 1;
+                }
+
+                this.setState({
+                    outputMetas: this.getOutputMetas()
+                })
+
+                let viewA = this.state.viewInstance;
+
+                setTimeout(() => { viewA.fitView({ duration: 200 }); }, 100);
+
+            });
+
+        }
+
 
     }
 
