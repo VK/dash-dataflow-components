@@ -1,6 +1,6 @@
 {
   "name": "dash_dataflow_components",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Components that create easy to use editable dataflows.",
   "main": "build/index.js",
   "scripts": {
