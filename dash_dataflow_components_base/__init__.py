@@ -6,6 +6,7 @@ import json
 
 import dash as _dash
 import dash_express_components
+from .interact import *
 
 # noinspection PyUnresolvedReferences
 from ._imports_ import *
