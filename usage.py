@@ -58,11 +58,9 @@ app.layout = html.Div([
         html.Div([
             ddc.DataFlow(
                 id='dataflow',
-                nodes=[{'id': 'n3', 'type': 'filter', 'data': {'config': [{'col': 'country', 'type': 'isin', 'value': ['Afghanistan']}]}}, {'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge', 'data': {'left_on': ['country'], 'right_on': ['country'], 'left_p': 'A', 'right_p': 'B', 'how': 'inner'}}, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}],
-                edges=[{'source': 'n1', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n2', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n0', 'target': 'n3', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n3', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i1'}], 
                 # nodeTypes = ["db", "filter", "merge"],
                 graphType="singleOutput",
-                meta=dataframe_meta
+                meta={}
                 )
         ], style={"width": "100%", "height": "300px"}),
         html.Div(id="node_out"),
@@ -85,8 +83,21 @@ app.layout = html.Div([
                "display": "inline-block", "float": "left"}
     )
 
-], className="p-4")
+], className="p-4", id="main")
 
+
+# callback to fill the initial state
+@callback(
+    Output(component_id='dataflow', component_property='meta'),
+    Output(component_id='dataflow', component_property='nodes'),
+    Output(component_id='dataflow', component_property='edges'),    
+    Input(component_id='main', component_property='className'),
+    prevent_initial_call=False
+)
+def update_output_div(_):
+    nodes=[{'id': 'n3', 'type': 'filter', 'data': {'config': [{'col': 'country', 'type': 'isin', 'value': ['Afghanistan']}]}}, {'id': 'n2', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}, {'id': 'n1', 'type': 'merge', 'data': {'left_on': ['country'], 'right_on': ['country'], 'left_p': 'A', 'right_p': 'B', 'how': 'inner'}}, {'id': 'out', 'type': 'out'}, {'id': 'n0', 'type': 'db', 'data': {'name': 'gapminder_extra_long'}}]
+    edges=[{'source': 'n1', 'target': 'out', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n2', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i2'}, {'source': 'n0', 'target': 'n3', 'sourceHandle': 'o', 'targetHandle': 'i'}, {'source': 'n3', 'target': 'n1', 'sourceHandle': 'o', 'targetHandle': 'i1'}]
+    return dataframe_meta, nodes, edges
 
 # callback for printing the nodes and egdes
 @callback(

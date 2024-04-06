@@ -339,18 +339,22 @@ export default class DataFlow extends Component {
 
         let edges_json = (newProps.edges) ? JSON.stringify(newProps.edges) : JSON.stringify(this.state.eEdges);
         let nodes_json = (newProps.nodes) ? JSON.stringify(newProps.nodes) : JSON.stringify(this.state.eNodes);
+        let meta_json = (newProps.meta) ? JSON.stringify(newProps.meta) : JSON.stringify(this.state.meta);
 
         if (
             (edges_json !== JSON.stringify(this.state.eEdges)) ||
-            (nodes_json !== JSON.stringify(this.state.eNodes))
+            (nodes_json !== JSON.stringify(this.state.eNodes)) ||
+            (meta_json !== JSON.stringify(this.state.meta))
         ) {
 
             let nodes = JSON.parse(nodes_json);
             let edges = JSON.parse(edges_json);
+            let meta = JSON.parse(meta_json);
 
             this.setState({
                 eNodes: nodes,
                 eEdges: edges,
+                meta: meta,
                 ...this.update_internal_nodes(nodes, edges)
             }, () => {
 
